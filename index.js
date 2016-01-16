@@ -5,7 +5,7 @@ var io   = require('socket.io')(http);
 var fs   = require('fs');
 var path = require('path');
 
-var robo = require('robo.js')
+var robo = require('./robo.js')
 
 //子プロセス生成、raspistillプロセス保持用
 var spawn = require('child_process').spawn;
@@ -81,17 +81,27 @@ function startStreaming(io) {
     console.log('File stream start.');
     return;//ここでreturnして以降の処理をしない。
   }
- 
+
+/*
   //raspistillプロセスを起動する
   var args = [
   	"-w", "320",                         //幅
   	"-h", "240",                         //高
   	"-o", "./stream/image_stream.jpg",   //ファイルパスとファイル名
   	"-t", "999999999",                   //撮影回数（＝無限）
-  	"-tl", "100",                        //撮影感覚(msec)
+  	"-tl", "100",                        //撮影間隔(msec)
   	"-rot", "270",                       //回転角（カメラ取り付けに合わせる）
   ];
   proc = spawn('raspistill', args);
+*/
+  //fswebcamプロセスを起動する
+  var args = [
+  	"-l", "1",                             //撮影回数（＝無限）
+  	"-r", "384x288",                              //撮影間隔(sec)
+  	"--save", "./stream/image_stream.jpg",   //ファイルパスとファイル名
+  ];
+  proc = spawn('fswebcam', args);
+
   console.log('Watching for changes...');
  
   //ファイル監視状態フラグを立てる
