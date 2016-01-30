@@ -4,7 +4,6 @@ var http = require('http').Server(app);
 var io   = require('socket.io')(http);
 var fs   = require('fs');
 var path = require('path');
-
 var robo = require('./robo.js')
 
 //子プロセス生成、raspistillプロセス保持用
@@ -17,6 +16,7 @@ app.use('/', express.static(path.join(__dirname, 'stream')));
 app.get('/', function(req, res) { res.sendFile(__dirname + '/index.html'); });
 
 var sockets = {};
+var dir = "";
 
 //クライアントからSocket接続があった場合の処理
 io.on('connection', function(socket) {
@@ -45,10 +45,28 @@ io.on('connection', function(socket) {
 
   //クライアントからのmove-XXX要求ならRoboを動作させる。
   socket.on('move-FW', function() {
+    dir = "move-FW";
     console.log('move FW.');
   });
   socket.on('move-FL', function() {
+    dir = "move-FW";
     console.log('move FL.');
+  });
+  socket.on('move-TL', function() {
+    dir = "move-TL";
+    console.log('move TL.');
+  });
+  socket.on('move-TR', function() {
+    dir = "move-TR";
+    console.log('move TR.');
+  });
+  socket.on('move-FR', function() {
+    dir = "move-FR";
+    console.log('move FR.');
+  });
+  socket.on('move-BK', function() {
+    dir = "move-BK";
+    console.log('move BK.');
   });
 
   //クライアントからのStop要求ならRoboの動作を全停止する。
@@ -96,9 +114,13 @@ function startStreaming(io) {
 */
   //fswebcamプロセスを起動する
   var args = [
-  	"-l", "1",                             //撮影回数（＝無限）
-  	"-r", "384x288",                              //撮影間隔(sec)
-  	"--save", "./stream/image_stream.jpg",   //ファイルパスとファイル名
+  	"-l", "-1",                             //繰り返し撮影（1sec毎）
+  	"-r", "640x480",                       //入力サイズ
+  	"--scale", "800x600",                  //出力サイズ
+  	"--set", "brightness=75%",             //輝度補正（%)
+  	"--font", "courier:20",                //フォント指定
+  	"--title", "TEST",                     //下部バナーの文字列
+  	"--save", "./stream/image_stream.jpg", //ファイルパスとファイル名
   ];
   proc = spawn('fswebcam', args);
 
