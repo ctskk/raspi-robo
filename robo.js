@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////
 //モジュール名前空間の定義
-var robo = require('wiring-pi')
+var wpi = require('wiring-pi')
 
 var robo;
 if (!robo)
@@ -21,79 +21,89 @@ else
 robo.NAME    = "ROBO";
 robo.VERSION = "0.1";
 
+//RaspberryPi(2)とモータードライバ間のピンアサイン(WiringPI版)
+//wiringPiSetup()で初期化する
+/*
+robo.LEFT_GO_PIN	=  0;
+robo.LEFT_DIR_PIN	=  7;
+robo.RIGHT_GO_PIN	= 12;
+robo.RIGHT_DIR_PIN	=  6;
+robo.SW1_PIN		= 14;
+robo.SW2_PIN		= 13;
+robo.LED1_PIN		= 11;
+robo.LED2_PIN		= 10;
+robo.OC1_PIN		=  3;
+robo.OC2_PIN		=  2;
+*/
+
+//RaspberryPi(2)とモータードライバ間のピンアサイン(Broadcom GPIO版)
+//wiringPiSetupGpio()で初期化する
+robo.LEFT_GO_PIN	= 17;
+robo.LEFT_DIR_PIN	=  4;
+robo.RIGHT_GO_PIN	= 10;
+robo.RIGHT_DIR_PIN	= 25;
+robo.SW1_PIN		= 11;
+robo.SW2_PIN		=  9;
+robo.LED1_PIN		=  7;
+robo.LED2_PIN		=  8;
+robo.OC1_PIN		= 22;
+robo.OC2_PIN		= 21;//(Rev1:21, Rev2:27)
+
+//クラス内で使用するマジックナンバーの定義(モーター回転方向の極性による)
+robo.LEFT_FORWARD   =  1;
+robo.LEFT_BACKWARD  =  0;
+robo.RIGHT_FORWARD  =  0;    //(+/- reversed)
+robo.RIGHT_BACKWARD =  1;    //(+/- reversed)
+robo.MOTOR_WAIT_MAX = 50;
+
+//デバッグ用のフラグ
+robo.DEBUG_MOTOR_OFF = 1;   //デバッグ時にモーターを動作させる(0), させない(1)
+
+
 /////////////////////////////////////////////////////////////////////
 //クラス宣言
-/*
-#define LEFT_GO_PIN		17
-#define LEFT_DIR_PIN	 4
-#define RIGHT_GO_PIN	10
-#define RIGHT_DIR_PIN	25
-#define SW1_PIN			11
-#define SW2_PIN			 9
-#define LED1_PIN		 7
-#define LED2_PIN		 8
-#define OC1_PIN			22
-#define OC2_PIN			21
-
-#define LEFT_FORWARD   1
-#define LEFT_BACKWARD  0
-#define RIGHT_FORWARD  0 //(+/- reversed)
-#define RIGHT_BACKWARD 1 //(+/- reversed)
-#define MOTOR_WAIT_MAX 50
-
-#define DEBUG_MOTOR_OFF	0  //! motor off when ture.
-*/
-robo.DEBUG_MOTOR_OFF = 1;	//デバッグ時にモーターを動作させる(0), させない(1)
-
 
 robo.Tank = function()
 {
-	this.x = 0;
-	this.y = 0;
-	this.w = 0;
-	this.h = 0;
-	this.children = new Array();
 }
-
-robo.Tank.prototype.addChild = function(o)
-{
-	this.children.push(o);
-};
 
 robo.Tank.prototype.debug = function(msg)
 {
 	console.log(msg);
 }
 
+/**
+ * Initialize
+ */
 robo.Tank.prototype.init = function()
 {
-	timeout(50);
+	//wpi.timeout(50);
 
-	if(wiringPiSetupGpio() == -1)
+	if(wpi.wiringPiSetupGpio() == -1)
 	{
-		debug("error.");
+		this.debug("Setup error.");
 		return 1;
 	}
 	else
 	{
-		debug("GPIO setup ok.");
+		this.debug("GPIO setup ok.");
 	}
 
 	//Set up GPIO port
-	pinMode (LEFT_DIR_PIN , OUTPUT);
-	pinMode (LEFT_GO_PIN  , OUTPUT);
-	pinMode (RIGHT_DIR_PIN, OUTPUT);
-	pinMode (RIGHT_GO_PIN , OUTPUT);
-	pinMode (LED1_PIN, OUTPUT);
-	pinMode (LED2_PIN, OUTPUT);
+	wpi.pinMode(robo.LEFT_DIR_PIN , wpi.OUTPUT);
+	wpi.pinMode(robo.LEFT_GO_PIN  , wpi.OUTPUT);
+	wpi.pinMode(robo.RIGHT_DIR_PIN, wpi.OUTPUT);
+	wpi.pinMode(robo.RIGHT_GO_PIN , wpi.OUTPUT);
+	wpi.pinMode(robo.LED1_PIN,      wpi.OUTPUT);
+	wpi.pinMode(robo.LED2_PIN,      wpi.OUTPUT);
 
 	//Reset morter direction
-	digitalWrite(LEFT_DIR_PIN,  LEFT_FORWARD);
-	digitalWrite(RIGHT_DIR_PIN, RIGHT_FORWARD);
+	wpi.digitalWrite(robo.LEFT_DIR_PIN,  robo.LEFT_FORWARD);
+	wpi.digitalWrite(robo.RIGHT_DIR_PIN, robo.RIGHT_FORWARD);
 
 	//Reset LED status
-	digitalWrite(LED1_PIN, 0);
-	digitalWrite(LED2_PIN, 0);
+	wpi.digitalWrite(robo.LED1_PIN, 0);
+	wpi.digitalWrite(robo.LED2_PIN, 0);
 
 	return 0;
 }
@@ -105,46 +115,52 @@ robo.Tank.prototype.delete = function()
 {
 }
 
+/**
+ * モーターを回転させる
+ * @param left  左車輪側のパルスの大きさ（現状1のみ）と方向（符号）によりモータを回転させる
+ * @param right 右車輪側のパルスの大きさ（現状1のみ）と方向（符号）によりモータを回転させる
+ * @param msec  モーターONする時間(msec). MOTOR_WAIT_MAXを上限とする。
+ */
 robo.Tank.prototype.motor_set = function(left, right, msec)
 {
 	//cap maximun length for motor ON
-	if (msec >= MOTOR_WAIT_MAX)
+	if (msec >= robo.MOTOR_WAIT_MAX)
 	{
-		msec = MOTOR_WAIT_MAX;
+		msec = robo.MOTOR_WAIT_MAX;
 	}
 
 	//motor direction
 	if (left >=0)
 	{
-		digitalWrite(LEFT_DIR_PIN,  LEFT_FORWARD);
+		wpi.digitalWrite(robo.LEFT_DIR_PIN,  robo.LEFT_FORWARD);
 	}
 	else
 	{
-		digitalWrite(LEFT_DIR_PIN,  LEFT_BACKWARD);
-		left = -left;
+		wpi.digitalWrite(robo.LEFT_DIR_PIN,  robo.LEFT_BACKWARD);
+		left = -left;//digitalWriteの引数にするため符号を正にする
 	}
 	if (right >= 0)
 	{
-		digitalWrite(RIGHT_DIR_PIN, RIGHT_FORWARD);
+		wpi.digitalWrite(robo.RIGHT_DIR_PIN, robo.RIGHT_FORWARD);
 	}
 	else
 	{
-		digitalWrite(RIGHT_DIR_PIN, RIGHT_BACKWARD);
-		right = -right;
+		wpi.digitalWrite(robo.RIGHT_DIR_PIN, robo.RIGHT_BACKWARD);
+		right = -right;//digitalWriteの引数にするため符号を正にする
 	}
-/*
-#if !DEBUG_MOTOR_OFF
-	for (int cnt = 0; cnt < 10; cnt++)
-	{
-		digitalWrite(LEFT_GO_PIN,  left);
-		digitalWrite(RIGHT_GO_PIN, right);	
-		delay(msec);
-		digitalWrite(LEFT_GO_PIN,  0);
-		digitalWrite(RIGHT_GO_PIN, 0);	
-		delay(MOTOR_WAIT_MAX - msec);
-	}
-#endif
-*/
+
+    if (robo.DEBUG_MOTOR_OFF)
+    {
+        for (var cnt = 0; cnt < 10; cnt++)
+        {
+            wpi.digitalWrite(robo.LEFT_GO_PIN,  left);
+            wpi.digitalWrite(robo.RIGHT_GO_PIN, right);	
+            wpi.delay(msec);
+            wpi.digitalWrite(robo.LEFT_GO_PIN,  0);
+            wpi.digitalWrite(robo.RIGHT_GO_PIN, 0);	
+            wpi.delay(robo.MOTOR_WAIT_MAX - msec);
+        }
+    }
 }
 
 robo.Tank.prototype.motor_forward = function(msec/* = 50*/)
