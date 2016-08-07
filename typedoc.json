@@ -1,0 +1,7 @@
+module.exports = {
+  "name": "raspi-robo",
+  "out": "doc",
+  "mode": "file",
+  "includeDeclarations": true,
+  "hideGenerator": false
+}
