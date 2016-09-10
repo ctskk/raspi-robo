@@ -4,11 +4,11 @@ import io       = require('socket.io');
 import path     = require('path');
 import fs       = require('fs');
 import child    = require('child_process');
-//import robo     = require('./robo.js');
+import robo     = require('./robo');
 //import Servo    = require('./Servo');
 
 var app = express();
-var spawn = child.spawn();
+//var spawn = child.spawn();
 
 //Node.jsの起動PathをHTTPのルートフォルダとして設定する。
 app.use('/', express.static(path.join(__dirname, 'stream')));
@@ -131,7 +131,7 @@ function startStreaming(io) {
   	"--title", "TEST",                     //下部バナーの文字列
   	"--save", "./stream/image_stream.jpg", //ファイルパスとファイル名
   ];
-  proc = spawn('fswebcam', args);
+  proc = child.spawn('fswebcam', args);
 
   console.log('Watching for changes...');
  
