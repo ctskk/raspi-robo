@@ -2,5 +2,4 @@ node_modules/
 typings/
 docs/
 .vscode
-*.js
 *.log

@@ -8,40 +8,40 @@ export class robo
 	//RaspberryPi(2)とモータードライバ間のピンアサイン(WiringPI版)
 	//wiringPiSetup()で初期化する
 	/*
-	LEFT_GO_PIN		=  0;
-	LEFT_DIR_PIN	=  7;
-	RIGHT_GO_PIN	= 12;
-	RIGHT_DIR_PIN	=  6;
-	SW1_PIN			= 14;
-	SW2_PIN			= 13;
-	LED1_PIN		= 11;
-	LED2_PIN		= 10;
-	OC1_PIN			=  3;
-	OC2_PIN			=  2;
+	private LEFT_GO_PIN		=  0;
+	private LEFT_DIR_PIN	=  7;
+	private RIGHT_GO_PIN	= 12;
+	private RIGHT_DIR_PIN	=  6;
+	private SW1_PIN			= 14;
+	private SW2_PIN			= 13;
+	private LED1_PIN		= 11;
+	private LED2_PIN		= 10;
+	private OC1_PIN			=  3;
+	private OC2_PIN			=  2;
 	*/
 
 	//RaspberryPi(2)とモータードライバ間のピンアサイン(Broadcom GPIO版)
 	//wiringPiSetupGpio()で初期化する
-	LEFT_GO_PIN		= 17;
-	LEFT_DIR_PIN	=  4;
-	RIGHT_GO_PIN	= 10;
-	RIGHT_DIR_PIN	= 25;
-	SW1_PIN			= 11;
-	SW2_PIN			=  9;
-	LED1_PIN		=  7;
-	LED2_PIN		=  8;
-	OC1_PIN			= 22;
-	OC2_PIN			= 21;//(Rev1:21, Rev2:27)
+	private LEFT_GO_PIN		= 17;
+	private LEFT_DIR_PIN	=  4;
+	private RIGHT_GO_PIN	= 10;
+	private RIGHT_DIR_PIN	= 25;
+	private SW1_PIN			= 11;
+	private SW2_PIN			=  9;
+	private LED1_PIN		=  7;
+	private LED2_PIN		=  8;
+	private OC1_PIN			= 22;
+	private OC2_PIN			= 21;//(Rev1:21, Rev2:27)
 
 	//クラス内で使用するマジックナンバーの定義(モーター回転方向の極性による)
-	LEFT_FORWARD   =  1;
-	LEFT_BACKWARD  =  0;
-	RIGHT_FORWARD  =  0;    //(+/- reversed)
-	RIGHT_BACKWARD =  1;    //(+/- reversed)
-	MOTOR_WAIT_MAX = 50;
+	private LEFT_FORWARD   =  1;
+	private LEFT_BACKWARD  =  0;
+	private RIGHT_FORWARD  =  0;    //(+/- reversed)
+	private RIGHT_BACKWARD =  1;    //(+/- reversed)
+	private MOTOR_WAIT_MAX = 50;
 
 	//デバッグ用のフラグ
-	DEBUG_MOTOR_OFF = 1;   //デバッグ時にモーターを動作させる(0), させない(1)
+	private DEBUG_MOTOR_OFF = 1;   //デバッグ時にモーターを動作させる(0), させない(1)
 
 	//コンストラクタ
 	constructor() {
@@ -73,7 +73,7 @@ export class robo
 		wpi.digitalWrite(this.LED2_PIN, 0);
 	}
 
-	public debug(msg) : void
+	public debug(msg : string) : void
 	{
 		console.log(msg);
 	}
@@ -84,7 +84,7 @@ export class robo
 	 * @param right 右車輪側のパルスの大きさ（現状1のみ）と方向（符号）によりモータを回転させる
 	 * @param msec  モーターONする時間(msec). MOTOR_WAIT_MAXを上限とする。
 	 */
-	public motor_set(left, right, msec)
+	public motor_set(left : number, right : number, msec : number) : void
 	{
 		//cap maximun length for motor ON
 		if (msec >= this.MOTOR_WAIT_MAX)
@@ -126,33 +126,45 @@ export class robo
 		}
 	}
 
-	public motor_forward(msec/* = 50*/)
+	public motor_forward(msec : number) : void
 	{
 		//Set both Left and Right forward.
 		this.motor_set(1, 1, msec);
 	}
 
-	public motor_backward(msec/* = 18*/)
+	public motor_backward(msec : number) : void
 	{
 		//Set both Left and Right backward.
 		this.motor_set(-1, -1, msec);
 	}
 
-	public motor_rotate_right(msec/* = 18*/)
+	public motor_rotate_right(msec : number) : void
 	{
 		//Set Left forward, Right backward.
 		this.motor_set(1, -1, msec);
 	}
 
-	public motor_rotate_left(msec/* = 18*/)
+	public motor_rotate_left(msec : number) : void
 	{
 		//Set Left backward, Right forward.
 		this.motor_set(-1, 1, msec);
 	}
 
-	public motor_stop(msec/* = 0*/)
+	public motor_trun_right(msec : number) : void
+	{
+		//Set Left forward
+		this.motor_set(1, 0, msec);
+	}
+
+	public motor_turn_left(msec : number) : void
+	{
+		//Set Right forward
+		this.motor_set(0, 1, msec);
+	}
+
+	public motor_stop() : void
 	{
 		//motor stop.
-		this.motor_set(0, 0, msec);
+		this.motor_set(0, 0, 0);
 	}
 }

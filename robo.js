@@ -9,16 +9,16 @@ var robo = (function () {
         //RaspberryPi(2)とモータードライバ間のピンアサイン(WiringPI版)
         //wiringPiSetup()で初期化する
         /*
-        LEFT_GO_PIN		=  0;
-        LEFT_DIR_PIN	=  7;
-        RIGHT_GO_PIN	= 12;
-        RIGHT_DIR_PIN	=  6;
-        SW1_PIN			= 14;
-        SW2_PIN			= 13;
-        LED1_PIN		= 11;
-        LED2_PIN		= 10;
-        OC1_PIN			=  3;
-        OC2_PIN			=  2;
+        private LEFT_GO_PIN		=  0;
+        private LEFT_DIR_PIN	=  7;
+        private RIGHT_GO_PIN	= 12;
+        private RIGHT_DIR_PIN	=  6;
+        private SW1_PIN			= 14;
+        private SW2_PIN			= 13;
+        private LED1_PIN		= 11;
+        private LED2_PIN		= 10;
+        private OC1_PIN			=  3;
+        private OC2_PIN			=  2;
         */
         //RaspberryPi(2)とモータードライバ間のピンアサイン(Broadcom GPIO版)
         //wiringPiSetupGpio()で初期化する
@@ -101,25 +101,33 @@ var robo = (function () {
             }
         }
     };
-    robo.prototype.motor_forward = function (msec /* = 50*/) {
+    robo.prototype.motor_forward = function (msec) {
         //Set both Left and Right forward.
         this.motor_set(1, 1, msec);
     };
-    robo.prototype.motor_backward = function (msec /* = 18*/) {
+    robo.prototype.motor_backward = function (msec) {
         //Set both Left and Right backward.
         this.motor_set(-1, -1, msec);
     };
-    robo.prototype.motor_rotate_right = function (msec /* = 18*/) {
+    robo.prototype.motor_rotate_right = function (msec) {
         //Set Left forward, Right backward.
         this.motor_set(1, -1, msec);
     };
-    robo.prototype.motor_rotate_left = function (msec /* = 18*/) {
+    robo.prototype.motor_rotate_left = function (msec) {
         //Set Left backward, Right forward.
         this.motor_set(-1, 1, msec);
     };
-    robo.prototype.motor_stop = function (msec /* = 0*/) {
+    robo.prototype.motor_trun_right = function (msec) {
+        //Set Left forward
+        this.motor_set(1, 0, msec);
+    };
+    robo.prototype.motor_turn_left = function (msec) {
+        //Set Right forward
+        this.motor_set(0, 1, msec);
+    };
+    robo.prototype.motor_stop = function () {
         //motor stop.
-        this.motor_set(0, 0, msec);
+        this.motor_set(0, 0, 0);
     };
     return robo;
 }());

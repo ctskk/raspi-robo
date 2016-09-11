@@ -5,7 +5,6 @@ import path     = require('path');
 import fs       = require('fs');
 import child    = require('child_process');
 import robo     = require('./robo');
-//import Servo    = require('./Servo');
 
 var app = express();
 //var spawn = child.spawn();
@@ -24,12 +23,13 @@ var server = http.createServer(app).listen(app.get('port'), function() {
 
 //WebSocketの生成;
 var websocket = io.listen(server);
-
 //接続ソケット管理用配列
 var sockets = {};
-
 //子プロセス生成、raspistillプロセス保持用
 var proc;
+
+//roboインスタンス生成
+var tank = new robo.robo();
 
 //クライアントからSocket接続があった場合の処理
 websocket.on('connection', function(socket) {
@@ -59,35 +59,36 @@ websocket.on('connection', function(socket) {
 
   //クライアントからのmove-XXX要求ならRoboを動作させる。
   socket.on('move-FW', function() {
+    tank.motor_forward(50);
     console.log('move FW.');
   });
   socket.on('move-FL', function() {
+    tank.motor_turn_left(50);
     console.log('move FL.');
   });
   socket.on('move-TL', function() {
+    tank.motor_rotate_left(50);
     console.log('move TL.');
   });
   socket.on('move-TR', function() {
+    tank.motor_rotate_right(50);
     console.log('move TR.');
   });
   socket.on('move-FR', function() {
+    tank.motor_trun_right(50);
     console.log('move FR.');
   });
   socket.on('move-BK', function() {
+    tank.motor_backward(50);
     console.log('move BK.');
   });
 
   //クライアントからのStop要求ならRoboの動作を全停止する。
   socket.on('stop-All', function() {
+    tank.motor_stop();
     console.log('stop-All');
   });
 });
-
-//ACK処理
-function ack(angle : number) : void {
-    console.log('[SRV] ACK:' + angle);
-    websocket.sockets.emit('ack', angle);
-}
 
 //ストリーム停止処理（未使用）
 function stopStreaming() {
