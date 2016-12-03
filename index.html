@@ -1,147 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
- 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Robo Tank</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Robo Tank</title>
 
-  <!-- Bootstrap CSSの読み込み（HTMLデザイン用） -->
-  <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+	<!-- Bootstrap CSSの読み込み（HTMLデザイン用） -->
+	<link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
 
-  <!-- カメラ映像部分のStyle設定 --> 
-  <style type="text/css">
-  #stream {
-    height: 99%;
-    margin: 0px auto;
-    display: block;
-    margin-top: 20px;
-  }
-  </style>
- 
-  <!-- jQueryの読み込み -->
-  <script src="http://code.jquery.com/jquery.js"></script>
-  <!-- Bootstrap JavaScriptの読み込み -->
-  <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-  <!-- Socket IO ライブラリの読み込み -->
-  <script src="/socket.io/socket.io.js"></script>
-  
-  <!-- WebSocket関連処理 -->
-  <script>
+	<!-- カメラ映像部分のStyle設定 --> 
+	<style type="text/css">
+	#stream {
+		height: 99%;
+		margin: 0px auto;
+		display: block;
+		margin-top: 20px;
+	}
+	</style>
 
-  //WebSocketを開く（デフォルトURLで開く）
-  var socket = io();
+	<!-- jQueryの読み込み -->
+	<script src="http://code.jquery.com/jquery.js"></script>
+	<!-- Bootstrap JavaScriptの読み込み -->
+	<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+	<!-- Socket IO ライブラリの読み込み -->
+	<script src="/socket.io/socket.io.js"></script>
 
-  //'liveStream'通知を待ち受けて、id:#streamを持つimgタグを
-  //'src'属性に入っているURL（＝JPEG画像）で置き換えて描画更新する。
-  socket.on('liveStream', function(url) {
-    $('#stream').attr('src', url);
-    $('.start').hide();
-  });
+	<!-- WebSocket関連処理 -->
+	<script>
 
-  //ストリーム配信開始
-  function startStream() {
-    //サーバー側に'start-stream'通知を送信し、.start属性のボタンを隠す。
-    socket.emit('start-stream');
-    $('.start').hide();
-  }
+	//WebSocketを開く（デフォルトURLで開く）
+	var socket = io();
 
-  //非常停止
-  function stopAll() {
-    socket.emit('stop-All');
-  }
-  
-  //移動
-  function move(direction) {
-    socket.emit('move-' + direction);
-  }
+	//'liveStream'通知を待ち受けて、id:#streamを持つimgタグを
+	//'src'属性に入っているURL（＝JPEG画像）で置き換えて描画更新する。
+	socket.on('liveStream', function(url) {
+		$('#stream').attr('src', url);
+		$('.start').hide();
+	});
 
-  //加速度検出
-  window.addEventListener("devicemotion", function(ev){
-    var dx = ev.accelerationIncludingGravity.x;
-        dy = ev.accelerationIncludingGravity.y;
-        dz = ev.accelerationIncludingGravity.z;
-    $("#x").text('acc X:' + Math.floor(dx*10));
-    $("#y").text('acc Y:' + Math.floor(dy*10));
-    $("#z").text('acc Z:' + Math.floor(dz*10));
-  });
-  
-  //回転量検出
-  window.addEventListener("deviceorientation", function(ev) {
-    var alpha = ev.alpha;   // z-axis
-    var beta = ev.beta;     // x-axis
-    var gamma = ev.gamma;   // y-axis
-    $("#a").text('alpha(z):' + Math.floor(alpha));
-    $("#b").text('beta (x):' + Math.floor(beta ));
-    $("#g").text('gamma(y):' + Math.floor(gamma));
-  });
-  </script>
+	//ストリーム配信開始
+	function startStream()
+	{
+		//サーバー側に'start-stream'通知を送信し、.start属性のボタンを隠す。
+		socket.emit('start-stream');
+		$('.start').hide();
+	}
+
+	//非常停止
+	function stopAll()
+	{
+		socket.emit('stop-All');
+	}
+
+	//移動
+	function move(direction)
+	{
+		socket.emit('move-' + direction);
+	}
+
+	//加速度検出
+	window.addEventListener("devicemotion", function(ev) {
+		var dx = ev.accelerationIncludingGravity.x;
+			dy = ev.accelerationIncludingGravity.y;
+			dz = ev.accelerationIncludingGravity.z;
+		$("#x").text('acc X:' + Math.floor(dx*10));
+		$("#y").text('acc Y:' + Math.floor(dy*10));
+		$("#z").text('acc Z:' + Math.floor(dz*10));
+	});
+
+	//回転量検出
+	window.addEventListener("deviceorientation", function(ev) {
+		var alpha = ev.alpha;   // z-axis
+		var beta = ev.beta;     // x-axis
+		var gamma = ev.gamma;   // y-axis
+		$("#a").text('alpha(z):' + Math.floor(alpha));
+		$("#b").text('beta (x):' + Math.floor(beta ));
+		$("#g").text('gamma(y):' + Math.floor(gamma));
+	});
+	</script>
 </head>
 
 <body class="container">
-  
-  <!-- 開始ボタン：押下すると startStream() を呼び出し、消える -->
-  <div class="row">
-    <div class="center-block">
-      <button type="button" id="" class="btn btn-info btn-lg col-xs-offset-4 col-xs-4 col-sm-4 start" onclick="startStream()">
-        <span class="glyphicon glyphicon-off"></span> Start
-      </button>
-    </div>
-  </div>
 
-  <!-- 動画用の Place Holder -->
-  <div class="row">
-    <img src="" id="stream">
-  </div>
-  <br/>
+	<!-- 開始ボタン：押下すると startStream() を呼び出し、消える -->
+	<div class="row">
+		<div class="center-block">
+			<button type="button" id="" class="btn btn-info btn-lg col-xs-offset-4 col-xs-4 col-sm-4 start" onclick="startStream()">
+				<span class="glyphicon glyphicon-off"></span> Start
+			</button>
+		</div>
+	</div>
 
-  <!-- 操作パネル -->
-  <div class="row">
-    <div class="center-block">
-      <!-- 前進 -->
-      <button type="button" class="btn btn-default btn-lg col-xs-2 col-sm-2" onclick="move('FW')">
-        <span class="glyphicon glyphicon-arrow-up"/>
-      </button>
-      <!-- 左旋回 -->
-      <button type="button" class="btn btn-default btn-lg col-xs-2 col-sm-2" onclick="move('FL')">
-        <span class="glyphicon glyphicon-chevron-left"/>
-      </button>
-      <!-- 左回転 -->
-      <button type="button" class="btn btn-default btn-lg col-xs-2 col-sm-2" onclick="move('TL')">
-        <span class="glyphicon glyphicon-circle-arrow-left"/>
-      </button>
-      <!-- 右回転 -->
-      <button type="button" class="btn btn-default btn-lg col-xs-2 col-sm-2" onclick="move('TR')">
-        <span class="glyphicon glyphicon-circle-arrow-right"/>
-      </button>
-      <!-- 右旋回 -->
-      <button type="button" class="btn btn-default btn-lg col-xs-2 col-sm-2" onclick="move('FR')">
-        <span class="glyphicon glyphicon-chevron-right"/>
-      </button>
-      <!-- 後退 -->
-      <button type="button" class="btn btn-default btn-lg col-xs-2 col-sm-2" onclick="move('BK')">
-        <span class="glyphicon glyphicon-arrow-down"/>
-      </button>
-    </div>
-  </div>
-  <br/>
-  <br/>
-  <div class="row">
-    <div class="center-block">
-      <!-- killスイッチ -->
-      <button type="button" class="btn btn-warning btn-lg col-xs-offset-4 col-xs-4 col-sm-4" onclick="stopAll()">
-        <span class="glyphicon glyphicon-ban-circle"/>
-      </button>
-    </div>
-  </div>
-  
-  <hr/>
-  <span id="x" style="display:block;"></span>
-  <span id="y" style="display:block;"></span>
-  <span id="z" style="display:block;"></span>
-  <br/>
-  <span id="a" style="display:block;"></span>
-  <span id="b" style="display:block;"></span>
-  <span id="g" style="display:block;"></span>
+		<!-- 動画用の Place Holder -->
+	<div class="row">
+		<img src="" id="stream">
+	</div>
+	<br/>
+
+	<!-- 操作パネル -->
+	<div class="row">
+		<div class="center-block">
+			<!-- 前進 -->
+			<button type="button" class="btn btn-default btn-lg col-xs-2 col-sm-2" onclick="move('FW')">
+				<span class="glyphicon glyphicon-arrow-up"/>
+			</button>
+			<!-- 左旋回 -->
+			<button type="button" class="btn btn-default btn-lg col-xs-2 col-sm-2" onclick="move('FL')">
+				<span class="glyphicon glyphicon-chevron-left"/>
+			</button>
+			<!-- 左回転 -->
+			<button type="button" class="btn btn-default btn-lg col-xs-2 col-sm-2" onclick="move('TL')">
+				<span class="glyphicon glyphicon-circle-arrow-left"/>
+			</button>
+			<!-- 右回転 -->
+			<button type="button" class="btn btn-default btn-lg col-xs-2 col-sm-2" onclick="move('TR')">
+				<span class="glyphicon glyphicon-circle-arrow-right"/>
+			</button>
+			<!-- 右旋回 -->
+			<button type="button" class="btn btn-default btn-lg col-xs-2 col-sm-2" onclick="move('FR')">
+				<span class="glyphicon glyphicon-chevron-right"/>
+			</button>
+			<!-- 後退 -->
+			<button type="button" class="btn btn-default btn-lg col-xs-2 col-sm-2" onclick="move('BK')">
+				<span class="glyphicon glyphicon-arrow-down"/>
+			</button>
+		</div>
+	</div>
+	<br/>
+	<br/>
+	<div class="row">
+		<div class="center-block">
+			<!-- killスイッチ -->
+			<button type="button" class="btn btn-warning btn-lg col-xs-offset-4 col-xs-4 col-sm-4" onclick="stopAll()">
+			<span class="glyphicon glyphicon-ban-circle"/>
+			</button>
+		</div>
+	</div>
+
+	<hr/>
+	<span id="x" style="display:block;"></span>
+	<span id="y" style="display:block;"></span>
+	<span id="z" style="display:block;"></span>
+	<br/>
+	<span id="a" style="display:block;"></span>
+	<span id="b" style="display:block;"></span>
+	<span id="g" style="display:block;"></span>
 </body>
 </html>
