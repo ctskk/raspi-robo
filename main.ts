@@ -41,15 +41,15 @@ websocket.on('connection', function(socket) {
 	//Socket切断時の処理
 	socket.on('disconnect', function() {
 
-	//オブジェクトを削除する。
-	delete sockets[socket.id];
+		//オブジェクトを削除する。
+		delete sockets[socket.id];
 
-	//誰からもStream監視されていないならカメラプロセスを終了し、ファイル監視もやめる。
-	if (Object.keys(sockets).length == 0) {
-		app.set('watchingFile', false);
-		if (proc) { proc.kill(); }
-		fs.unwatchFile('./stream/image_stream.jpg');
-	}
+		//誰からもStream監視されていないならカメラプロセスを終了し、ファイル監視もやめる。
+		if (Object.keys(sockets).length == 0) {
+			app.set('watchingFile', false);
+			if (proc) { proc.kill(); }
+			fs.unwatchFile('./stream/image_stream.jpg');
+		}
 	});
 
 	//クライアントからのStream開始要求ならストリーム配信を開始する。
