@@ -1,6 +1,8 @@
 node_modules/
-typings/
 docs/
+out/*.js
+out/*.js.map
 .vscode
 *.log
 .DS_Store
+package-lock.json
