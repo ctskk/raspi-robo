@@ -2,7 +2,6 @@ node_modules/
 docs/
 out/*.js
 out/*.js.map
-.vscode
 *.log
 .DS_Store
 package-lock.json
