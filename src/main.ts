@@ -7,7 +7,7 @@ import {spawn} from 'child_process';
 
 import {robo} from './robo';
 
-// class RoboServer
+// TODO: class RoboServerとして下記ソースをクラス化する
 
 const app = express();
 const io = socketIo();
@@ -34,7 +34,7 @@ const sockets = {};
 let proc;
 
 //roboインスタンス生成
-// const tank = new robo();
+const tank = new robo();
 
 //クライアントからSocket接続があった場合の処理
 websocket.on('connection', socket => 
@@ -66,39 +66,39 @@ websocket.on('connection', socket =>
 	//クライアントからのmove-XXX要求ならRoboを動作させる。
 	socket.on('move-FW', () =>
 	{
-		// tank.motor_forward(50);
+		tank.motor_forward(50);
 		console.log('move FW.');
 	});
 	socket.on('move-FL', () =>
 	{
-		// tank.motor_turn_left(50);
+		tank.motor_turn_left(50);
 		console.log('move FL.');
 	});
 	socket.on('move-TL', () =>
 	{
-		// tank.motor_rotate_left(50);
+		tank.motor_rotate_left(50);
 		console.log('move TL.');
 	});
 	socket.on('move-TR', () =>
 	{
-		// tank.motor_rotate_right(50);
+		tank.motor_rotate_right(50);
 		console.log('move TR.');
 	});
 	socket.on('move-FR', () =>
 	{
-		// tank.motor_trun_right(50);
+		tank.motor_trun_right(50);
 		console.log('move FR.');
 	});
 	socket.on('move-BK', () =>
 	{
-		// tank.motor_backward(50);
+		tank.motor_backward(50);
 		console.log('move BK.');
 	});
 
 	//クライアントからのStop要求ならRoboの動作を全停止する。
 	socket.on('stop-All', () =>
 	{
-		// tank.motor_stop();
+		tank.motor_stop();
 		console.log('stop-All');
 	});
 });
